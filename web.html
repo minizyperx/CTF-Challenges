@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTF Decryption Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: #050505;
+            color: #00ff41;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 15% 25%, rgba(0, 255, 65, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(0, 166, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 200, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 65, 0.03) 2px, rgba(0, 255, 65, 0.03) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 65, 0.03) 2px, rgba(0, 255, 65, 0.03) 4px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(5, 10, 15, 0.92);
+            border: 2px solid transparent;
+            background-image: 
+                linear-gradient(rgba(5, 10, 15, 0.92), rgba(5, 10, 15, 0.92)),
+                linear-gradient(135deg, #00ff41, #00a2ff, #ff00c8);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 
+                0 10px 60px rgba(0, 255, 65, 0.15),
+                0 0 100px rgba(0, 166, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #00ff41, #00a2ff, #ff00c8, #00ff41);
+            background-size: 400% 400%;
+            z-index: -1;
+            border-radius: 20px;
+            animation: gradient 8s ease infinite;
+            filter: blur(30px);
+            opacity: 0.3;
+        }
+        
+        @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .header-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 65, 0.5));
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #00ff41 0%, #00a2ff 50%, #ff00c8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            position: relative;
+        }
+        
+        .description {
+            color: #b0b0b0;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .challenge-box {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.03) 0%, rgba(0, 166, 255, 0.03) 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 35px;
+            border: 1px solid rgba(0, 166, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .challenge-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            animation: scan 3s infinite;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .challenge-title {
+            text-align: center;
+            margin-bottom: 18px;
+            color: #00a2ff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .challenge-text {
+            text-align: center;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #d0d0d0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .terminal-window {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .terminal-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #00a2ff;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            background: rgba(0, 15, 25, 0.8);
+            border: 2px solid rgba(0, 255, 65, 0.3);
+            padding: 16px 20px;
+            border-radius: 10px;
+            color: #00ff41;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            border-color: #00ff41;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 65, 0.3),
+                inset 0 0 10px rgba(0, 255, 65, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        input::placeholder {
+            color: #3a3a3a;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        button {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 166, 255, 0.1) 100%);
+            border: 2px solid rgba(0, 255, 65, 0.4);
+            padding: 16px 24px;
+            border-radius: 10px;
+            color: #00ff41;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            border-color: #00ff41;
+            box-shadow: 
+                0 10px 30px rgba(0, 255, 65, 0.3),
+                0 0 20px rgba(0, 255, 65, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        button.hint-btn {
+            background: linear-gradient(135deg, rgba(0, 166, 255, 0.1) 0%, rgba(255, 0, 200, 0.1) 100%);
+            border-color: rgba(0, 166, 255, 0.4);
+            color: #00a2ff;
+        }
+        
+        button.hint-btn:hover {
+            border-color: #00a2ff;
+            box-shadow: 
+                0 10px 30px rgba(0, 166, 255, 0.3),
+                0 0 20px rgba(0, 166, 255, 0.2);
+        }
+        
+        #result {
+            text-align: center;
+            min-height: 70px;
+            font-size: 1.2rem;
+            padding: 20px;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            color: #808080;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.15) 0%, rgba(0, 255, 65, 0.05) 100%);
+            color: #00ff41;
+            border: 2px solid #00ff41;
+            animation: successPulse 2s infinite;
+            font-weight: 600;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(255, 51, 102, 0.05) 100%);
+            color: #ff3366;
+            border: 2px solid #ff3366;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes successPulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 35px rgba(0, 255, 65, 0.6);
+                transform: scale(1.02);
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .hint {
+            margin-top: 35px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(0, 166, 255, 0.08) 0%, rgba(255, 0, 200, 0.08) 100%);
+            border-left: 4px solid #00a2ff;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #c0c0c0;
+            line-height: 1.6;
+            display: none;
+            animation: slideIn 0.4s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hint-title {
+            color: #00a2ff;
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .decryption-animation {
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff41, #00a2ff, #ff00c8);
+            margin: 25px auto 0;
+            border-radius: 3px;
+            transition: width 1s ease-in-out;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #808080;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.4rem;
+            color: #00ff41;
+            font-weight: 700;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 25px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .header-icon {
+                font-size: 3rem;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">🔓</div>
+            <h1>DECRYPTION CHALLENGE</h1>
+            <p class="description">
+                A flag has been scrambled and hidden in the JavaScript code. Your mission is to find it and reverse the scrambling process.
+            </p>
+        </div>
+        
+        <div class="challenge-box">
+            <div class="challenge-title">📡 Mission Briefing</div>
+            <p class="challenge-text">
+                We've intercepted an encrypted message, but our decryption algorithms are offline.<br>
+                You'll need to manually analyze the page source to find the scrambled flag and determine how to decode it.
+            </p>
+            <div class="decryption-animation" id="decryptionAnimation"></div>
+        </div>
+        
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+            </div>
+            <div class="input-group">
+                <label class="input-label">⚡ ENTER DECRYPTED FLAG:</label>
+                <input type="text" id="flagInput" placeholder="dalisce{...}" autocomplete="off">
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="checkFlag()">🚀 Validate Solution</button>
+            <button class="hint-btn" onclick="showHint()">💡 Need a Hint?</button>
+        </div>
+        
+        <div id="result">⏳ Waiting for your solution...</div>
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label">ATTEMPTS</div>
+                <div class="stat-value" id="attempts">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">DIFFICULTY</div>
+                <div class="stat-value">★★☆☆☆</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">POINTS</div>
+                <div class="stat-value">100</div>
+            </div>
+        </div>
+        
+        <div class="hint" id="hintBox">
+            <div class="hint-title">🔍 Investigation Hint</div>
+            <p>Examine the page source carefully. Look for JavaScript comments and variables that might contain the scrambled flag. The solution might be simpler than you think!</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple JS scramble: reverse the string to get the flag
+        const scrambledFlag = "}kc4h_bew{cesilad"; 
+        let attemptCount = 0;
+
+        function checkFlag() {
+            const userInput = document.getElementById('flagInput').value;
+            const correctFlag = scrambledFlag.split('').reverse().join('');
+            const resultElement = document.getElementById('result');
+            const decryptionAnimation = document.getElementById('decryptionAnimation');
+            
+            attemptCount++;
+            document.getElementById('attempts').textContent = attemptCount;
+            
+            // Show decryption animation
+            decryptionAnimation.style.width = '100%';
+            
+            setTimeout(() => {
+                if(userInput === correctFlag){
+                    resultElement.textContent = "🎉 SUCCESS! Flag decrypted successfully!";
+                    resultElement.className = "success";
+                } else {
+                    resultElement.textContent = "❌ ACCESS DENIED! Incorrect flag. Try again!";
+                    resultElement.className = "error";
+                    
+                    // Shake animation on wrong answer
+                    document.querySelector('.container').style.animation = "shake 0.5s";
+                    setTimeout(() => {
+                        document.querySelector('.container').style.animation = "";
+                    }, 500);
+                }
+                
+                // Reset animation
+                setTimeout(() => {
+                    decryptionAnimation.style.width = '0%';
+                }, 500);
+            }, 1000);
+        }
+        
+        function showHint() {
+            const hintBox = document.getElementById('hintBox');
+            if (hintBox.style.display === 'none' || hintBox.style.display === '') {
+                hintBox.style.display = 'block';
+            } else {
+                hintBox.style.display = 'none';
+            }
+        }
+        
+        // Add Enter key support
+        document.getElementById('flagInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkFlag();
+            }
+        });
+    </script>
+</body>
+</html>

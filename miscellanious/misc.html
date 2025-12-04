@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Missing Pattern – Misc Challenge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Courier New", monospace;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 16px;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%, #000 100%);
+      color: #e5e7eb;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 18px;
+      padding: 32px 26px 26px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #facc15;
+      text-shadow: 0 0 16px rgba(250, 204, 21, 0.7);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.98rem;
+      color: #cbd5f5;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .subtitle code {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      font-size: 0.9rem;
+    }
+
+    .section {
+      margin-bottom: 28px;
+      padding: 18px 16px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .section-text {
+      font-size: 0.95rem;
+      color: #e5e7eb;
+      line-height: 1.7;
+    }
+
+    .download-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .download-note {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      max-width: 60%;
+      line-height: 1.6;
+    }
+
+    .download-btn {
+      padding: 11px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: linear-gradient(135deg, #22c55e, #22d3ee);
+      color: #020617;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.5);
+      transition: transform 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(34, 197, 94, 0.7);
+    }
+
+    .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 10px;
+      border: 1.5px solid rgba(52, 211, 153, 0.9);
+      padding: 13px 14px;
+      font-size: 1rem;
+      color: #e5e7eb;
+      outline: none;
+      transition: box-shadow 0.2s, transform 0.15s, border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 16px rgba(34, 197, 94, 0.7);
+      transform: translateY(-1px);
+      border-color: #22c55e;
+    }
+
+    input::placeholder {
+      color: #4b5563;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      flex: 1;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: bold;
+      padding: 11px 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #020617;
+      box-shadow: 0 10px 20px rgba(34, 197, 94, 0.45);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(34, 197, 94, 0.7);
+    }
+
+    .secondary-btn {
+      background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+      color: #e5e7eb;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.55);
+    }
+
+    .secondary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.7);
+    }
+
+    #result {
+      min-height: 52px;
+      border-radius: 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.5);
+      padding: 12px;
+      font-size: 0.98rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.9);
+      color: #9ca3af;
+      transition: all 0.2s;
+    }
+
+    .result-success {
+      border-style: solid;
+      border-color: #22c55e;
+      background: rgba(22, 163, 74, 0.14);
+      color: #bbf7d0;
+      box-shadow: 0 0 18px rgba(34, 197, 94, 0.7);
+    }
+
+    .result-error {
+      border-style: solid;
+      border-color: #f97373;
+      background: rgba(248, 113, 113, 0.1);
+      color: #fecaca;
+    }
+
+    .hint-box {
+      margin-top: 20px;
+      padding: 14px 14px 12px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(56, 189, 248, 0.8);
+      font-size: 0.88rem;
+      color: #e5e7eb;
+      display: none;
+    }
+
+    .hint-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #38bdf8;
+      margin-bottom: 6px;
+    }
+
+    .hint-box ul {
+      padding-left: 18px;
+    }
+
+    .hint-box li {
+      margin-bottom: 4px;
+      color: #cbd5f5;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 26px 18px 20px;
+      }
+      .download-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .download-note {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Missing Pattern</h1>
+
+    <p class="subtitle">
+      Download the puzzle file, decode the numeric sequence inside it, and submit the flag in the format
+      <code>DALISEC{WORD}</code>.
+    </p>
+
+    <div class="section">
+      <div class="section-title">Puzzle File</div>
+      <div class="section-text">
+        This file contains the full description and the number sequence for this challenge.
+      </div>
+      <div class="download-row">
+        <div class="download-note">
+          Use the contents of <strong>sequence_puzzle.txt</strong> to identify the hidden word and build your flag.
+        </div>
+        <button class="download-btn" id="downloadBtn">
+          ⬇ Download sequence_puzzle.txt
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="label">Submit Flag</div>
+      <div class="input-group">
+        <input
+          type="text"
+          id="flagInput"
+          placeholder="DALISEC{YOURWORD}"
+          autocomplete="off"
+        />
+      </div>
+      <div class="button-row">
+        <button class="primary-btn" onclick="checkFlag()">
+          ✅ Validate Flag
+        </button>
+        <button class="secondary-btn" onclick="toggleHint()">
+          💡 Show / Hide Hints
+        </button>
+      </div>
+      <div id="result">
+        Waiting for your flag submission...
+      </div>
+    </div>
+
+    <div class="hint-box" id="hintBox">
+      <div class="hint-title">Hints</div>
+      <ul>
+        <li>Think simple mapping: A=1, B=2, ..., Z=26.</li>
+        <li>The sequence maps directly to letters, no extra tricks.</li>
+        <li>The hidden word is used to describe an order of things.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Content of sequence_puzzle.txt (only in file, not directly shown in UI)
+    const txtContent = `Challenge: "Missing Pattern"
+
+A field report contains a suspicious sequence of numbers — the sender claims it's random, 
+but you suspect a pattern. Use your reasoning skills to decode the hidden word and retrieve the flag.
+
+File: sequence_puzzle.txt
+Objective: Determine the hidden word from the sequence and present the flag in the format DALISEC{WORD}
+
+Sequence:
+19, 5, 17, 21, 5, 14, 3, 5
+
+Hints (optional):
+1. Think simple mapping: A=1, B=2, ..., Z=26.
+2. The sequence maps directly to letters.
+3. The word is an English word often used to describe an order of things.
+
+Good luck!
+`;
+
+    // Download handler
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const blob = new Blob([txtContent], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sequence_puzzle.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Decode sequence using A1Z26
+    function decodeSequence() {
+      const nums = [19, 5, 17, 21, 5, 14, 3, 5];
+      return nums
+        .map(n => String.fromCharCode(96 + n)) // lowercase letters
+        .join(""); // "sequence"
+    }
+
+    const hiddenWord = decodeSequence();              // "sequence"
+    const correctFlag = `DALISEC{${hiddenWord}}`;     // DALISEC{sequence}
+
+    function normaliseFlag(str) {
+      return str.trim().toLowerCase();
+    }
+
+    function checkFlag() {
+      const input = document.getElementById("flagInput").value;
+      const resultEl = document.getElementById("result");
+
+      if (!input.trim()) {
+        resultEl.textContent = "Please enter a flag before submitting.";
+        resultEl.className = "";
+        return;
+      }
+
+      if (normaliseFlag(input) === normaliseFlag(correctFlag)) {
+        resultEl.textContent = "🎉 Correct! You found the hidden pattern and recovered the flag.";
+        resultEl.className = "result-success";
+      } else {
+        resultEl.textContent = "❌ Incorrect flag. Re-check your mapping and the final word.";
+        resultEl.className = "result-error";
+      }
+    }
+
+    function toggleHint() {
+      const box = document.getElementById("hintBox");
+      box.style.display = box.style.display === "none" || box.style.display === "" ? "block" : "none";
+    }
+
+    // Enter key support
+    document.getElementById("flagInput").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        checkFlag();
+      }
+    });
+  </script>
+</body>
+</html>

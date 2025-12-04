@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CTF Challenge Hub</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+        color: #fff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(0, 234, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .grid-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(0, 234, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 234, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .content {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    h1 {
+        font-size: 56px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #00eaff 0%, #a855f7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 16px;
+        animation: fadeInDown 0.8s ease;
+        letter-spacing: -1px;
+    }
+
+    .subtitle {
+        font-size: 20px;
+        color: #a0a0a0;
+        margin-bottom: 50px;
+        animation: fadeInUp 0.8s ease 0.2s backwards;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 800px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        padding: 0 20px;
+        animation: fadeInUp 0.8s ease 0.4s backwards;
+    }
+
+    .btn {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 234, 255, 0.2);
+        padding: 28px 24px;
+        text-decoration: none;
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0, 234, 255, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .btn:hover::before {
+        opacity: 1;
+    }
+
+    .btn:hover {
+        transform: translateY(-8px);
+        border-color: rgba(0, 234, 255, 0.5);
+        box-shadow: 
+            0 20px 40px rgba(0, 234, 255, 0.2),
+            0 0 20px rgba(0, 234, 255, 0.1);
+    }
+
+    .btn-icon {
+        font-size: 42px;
+        filter: drop-shadow(0 4px 8px rgba(0, 234, 255, 0.3));
+        transition: transform 0.3s ease;
+    }
+
+    .btn:hover .btn-icon {
+        transform: scale(1.15) rotate(5deg);
+    }
+
+    .btn-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #fff;
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-desc {
+        font-size: 14px;
+        color: #a0a0a0;
+        position: relative;
+        z-index: 1;
+    }
+
+    footer {
+        position: relative;
+        z-index: 1;
+        padding: 30px 20px;
+        font-size: 14px;
+        color: #666;
+        text-align: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    footer span {
+        color: #00eaff;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 40px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+        }
+        
+        .container {
+            grid-template-columns: 1fr;
+            max-width: 400px;
+        }
+    }
+</style>
+</head>
+
+<body>
+    <div class="grid-bg"></div>
+    
+    <div class="content">
+        <h1>🚩 CTF Challenge Hub</h1>
+        <p class="subtitle">Select a category to start solving challenges</p>
+
+        <div class="container">
+            <a href="steg.html" class="btn">
+                <div class="btn-icon">🖼</div>
+                <div class="btn-title">Steganography</div>
+                <div class="btn-desc">Hidden messages in images</div>
+            </a>
+
+            <a href="crypto/crypto.html" class="btn">
+                <div class="btn-icon">🔐</div>
+                <div class="btn-title">Cryptography</div>
+                <div class="btn-desc">Break codes & ciphers</div>
+            </a>
+
+            <a href="web.html" class="btn">
+                <div class="btn-icon">🌍</div>
+                <div class="btn-title">Web Exploitation</div>
+                <div class="btn-desc">Find vulnerabilities</div>
+            </a>
+
+            <a href="osint.html" class="btn">
+                <div class="btn-icon">🕵</div>
+                <div class="btn-title">OSINT</div>
+                <div class="btn-desc">Intelligence gathering</div>
+            </a>
+
+            <a href="miscellanious/misc.html" class="btn">
+                <div class="btn-icon">🧩</div>
+                <div class="btn-title">Miscellaneous</div>
+                <div class="btn-desc">Logic puzzles & more</div>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        Made with <span>⚡</span> for CTF enthusiasts · Hosted on Vercel
+    </footer>
+</body>
+</html>

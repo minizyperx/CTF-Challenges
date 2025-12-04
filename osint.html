@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSINT Challenge</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+      color: #c9d1d9;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: #58a6ff;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+      letter-spacing: 1px;
+    }
+    
+    .header p {
+      color: #8b949e;
+      font-size: 1.1rem;
+    }
+    
+    .challenge-box {
+      background: linear-gradient(145deg, #161b22, #1a2029);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      border: 1px solid #30363d;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .challenge-box::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      z-index: -1;
+      background: linear-gradient(45deg, #58a6ff, #238636, #da3633, #d29922);
+      border-radius: 18px;
+      animation: borderAnimation 3s ease infinite;
+      background-size: 300% 300%;
+    }
+    
+    @keyframes borderAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    .input-group label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+    
+    .flag-input {
+      width: 100%;
+      padding: 16px;
+      background: #0d1117;
+      border: 2px solid #30363d;
+      border-radius: 10px;
+      color: #c9d1d9;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .flag-input:focus {
+      outline: none;
+      border-color: #58a6ff;
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+    }
+    
+    .flag-input::placeholder {
+      color: #6e7681;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(to right, #238636, #2ea043);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(35, 134, 54, 0.4);
+    }
+    
+    .submit-btn:hover {
+      background: linear-gradient(to right, #2ea043, #3fb950);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(35, 134, 54, 0.5);
+    }
+    
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+    
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+    
+    .result.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .success {
+      background: rgba(35, 134, 54, 0.2);
+      color: #3fb950;
+      border: 1px solid #238636;
+    }
+    
+    .error {
+      background: rgba(218, 54, 51, 0.2);
+      color: #f85149;
+      border: 1px solid #da3633;
+    }
+    
+    .hint-box {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(88, 166, 255, 0.1);
+      border-radius: 10px;
+      border: 1px solid #30363d;
+    }
+    
+    .hint-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      color: #58a6ff;
+      font-weight: 600;
+    }
+    
+    .hint-title i {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .hint-content {
+      line-height: 1.6;
+      color: #8b949e;
+    }
+    
+    .hint-content b {
+      color: #58a6ff;
+      font-weight: 600;
+    }
+    
+    .pulse {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #3fb950;
+      margin-right: 8px;
+      box-shadow: 0 0 0 rgba(63, 185, 80, 0.4);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(63, 185, 80, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #6e7681;
+      font-size: 0.9rem;
+    }
+    
+    .security-notice {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 0.9rem;
+      color: #8b949e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-search"></i> OSINT Challenge</h1>
+      <p>Test your investigative skills with this challenge</p>
+    </div>
+    
+    <div class="challenge-box">
+      <div class="input-group">
+        <label for="flagInput">Enter the flag you discovered:</label>
+        <input type="text" id="flagInput" class="flag-input" placeholder="CTF{...}">
+      </div>
+      
+      <button class="submit-btn" onclick="checkFlag()">
+        <i class="fas fa-paper-plane"></i> Submit Flag
+      </button>
+      
+      <div class="result" id="result"></div>
+      
+      <div class="hint-box">
+        <div class="hint-title">
+          <i class="fas fa-lightbulb"></i>
+          <span>Investigation Hint</span>
+        </div>
+        <div class="hint-content">
+          In the world of breakup and relationship do u know what Mr <b>minizyperx</b> is commited with?
+        </div>
+      </div>
+      
+      <div class="security-notice">
+        <i class="fas fa-shield-alt"></i> Flag validation is securely handled
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p><span class="pulse"></span> OSINT Challenge v2.0</p>
+    </div>
+  </div>
+
+  <script>
+    // Obfuscated flag validation logic
+    function checkFlag() {
+      const input = document.getElementById("flagInput").value.trim();
+      const result = document.getElementById("result");
+      
+      // Clear previous results and hide
+      result.classList.remove("show", "success", "error");
+      
+      // Add slight delay for UI effect
+      setTimeout(() => {
+        // Obfuscated flag validation
+        const flagParts = [
+          String.fromCharCode(67), 
+          String.fromCharCode(84), 
+          String.fromCharCode(70), 
+          String.fromCharCode(123),
+          atob('bmV3'), // "new"
+          String.fromCharCode(95), // underscore
+          atob('ZGVsaGk='), // "delhi"
+          String.fromCharCode(125)
+        ];
+        
+        const correctFlag = flagParts.join('');
+        
+        if (input === correctFlag) {
+          result.className = "result success show";
+          result.innerHTML = '<i class="fas fa-check-circle"></i> Correct! Well done.';
+        } else {
+          result.className = "result error show";
+          result.innerHTML = '<i class="fas fa-times-circle"></i> Incorrect! Try again.';
+        }
+      }, 300);
+    }
+    
+    // Allow submitting with Enter key
+    document.getElementById("flagInput").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        checkFlag();
+      }
+    });
+    
+    // Anti-tampering measure
+    let lastValue = '';
+    document.getElementById("flagInput").addEventListener('input', function(e) {
+      // Simple obfuscation of input value
+      lastValue = e.target.value;
+    });
+  </script>
+</body>
+</html>

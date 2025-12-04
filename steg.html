@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stego Challenge – Hidden Image Flag</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Courier New", monospace;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 16px;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1020 50%, #0a0a14 100%);
+      color: #e5e7eb;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(34, 197, 94, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .grid-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 880px;
+      background: rgba(10, 10, 20, 0.85);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 45px 35px;
+      border: 2px solid transparent;
+      background-image: 
+        linear-gradient(rgba(10, 10, 20, 0.85), rgba(10, 10, 20, 0.85)),
+        linear-gradient(135deg, #7c3aed, #22c55e, #06b6d4);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      box-shadow: 
+        0 30px 80px rgba(0, 0, 0, 0.6),
+        0 0 100px rgba(124, 58, 237, 0.15);
+      position: relative;
+      z-index: 1;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .header-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      display: inline-block;
+      filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.6));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #7c3aed 0%, #22c55e 50%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: #9ca3af;
+      line-height: 1.7;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .subtitle code {
+      background: rgba(124, 58, 237, 0.15);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      font-size: 0.95rem;
+      color: #c4b5fd;
+    }
+
+    .section {
+      margin-bottom: 28px;
+      padding: 25px 22px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(34, 197, 94, 0.05) 100%);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.1), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #7c3aed;
+      margin-bottom: 12px;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-text {
+      font-size: 1rem;
+      color: #cbd5e1;
+      line-height: 1.8;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .image-card {
+      border-radius: 16px;
+      border: 2px solid rgba(124, 58, 237, 0.3);
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(124, 58, 237, 0.1) 100%);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .image-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .image-card:hover::before {
+      opacity: 1;
+    }
+
+    .image-card:hover {
+      transform: translateY(-5px);
+      border-color: #7c3aed;
+      box-shadow: 
+        0 20px 40px rgba(124, 58, 237, 0.3),
+        0 0 30px rgba(124, 58, 237, 0.2);
+    }
+
+    .image-thumb {
+      width: 90px;
+      height: 90px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #7c3aed 0%, #22c55e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .image-info {
+      position: relative;
+      z-index: 1;
+    }
+
+    .image-info-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #e5e7eb;
+    }
+
+    .image-info-sub {
+      font-size: 0.95rem;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .image-meta {
+      font-size: 0.85rem;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #22c55e;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      border: 2px solid rgba(34, 197, 94, 0.3);
+      padding: 16px 18px;
+      font-size: 1.05rem;
+      color: #e5e7eb;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #22c55e;
+      box-shadow: 
+        0 0 20px rgba(34, 197, 94, 0.4),
+        inset 0 0 10px rgba(34, 197, 94, 0.05);
+      transform: translateY(-2px);
+    }
+
+    input::placeholder {
+      color: #4b5563;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 15px 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .primary-btn::before,
+    .secondary-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .primary-btn:hover::before,
+    .secondary-btn:hover::before {
+      left: 100%;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #020617;
+      border: 2px solid transparent;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(34, 197, 94, 0.5);
+    }
+
+    .secondary-btn {
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      color: #e5e7eb;
+      border: 2px solid transparent;
+    }
+
+    .secondary-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(124, 58, 237, 0.5);
+    }
+
+    #result {
+      min-height: 70px;
+      border-radius: 12px;
+      border: 2px solid rgba(148, 163, 184, 0.2);
+      padding: 18px;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      color: #9ca3af;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .result-success {
+      border-color: #22c55e;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+      color: #bbf7d0;
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+      animation: successPulse 2s infinite;
+      font-weight: 600;
+    }
+
+    @keyframes successPulse {
+      0%, 100% { 
+        box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+      }
+      50% { 
+        box-shadow: 0 0 45px rgba(34, 197, 94, 0.6);
+      }
+    }
+
+    .result-error {
+      border-color: #ef4444;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+      color: #fecaca;
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    .hint-box {
+      margin-top: 20px;
+      padding: 20px 20px 18px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      font-size: 0.95rem;
+      color: #e5e7eb;
+      display: none;
+      animation: slideDown 0.4s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hint-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #06b6d4;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .hint-box ul {
+      padding-left: 22px;
+    }
+
+    .hint-box li {
+      margin-bottom: 8px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .hint-box strong {
+      color: #22c55e;
+    }
+
+    .hint-box code {
+      background: rgba(124, 58, 237, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #c4b5fd;
+    }
+
+    .stats-footer {
+      margin-top: 30px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      color: #7c3aed;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .header-icon {
+        font-size: 3rem;
+      }
+
+      .image-card {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .button-row {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-footer {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-overlay"></div>
+  
+  <div class="card">
+    <div class="header">
+      <div class="header-icon">🔍</div>
+      <h1>Stego Challenge</h1>
+      <p class="subtitle">
+        Download the challenge image, extract the hidden data using steganography, and submit the flag
+        in the format <code>DALISEC{flag}</code>.
+      </p>
+    </div>
+
+    <!-- IMAGE DOWNLOAD / REDIRECT SECTION -->
+    <div class="section">
+      <div class="section-title">🖼️ Challenge Image</div>
+      <div class="section-text">
+        The image is hosted externally. Click the card below to open the file location (e.g., Google Drive),
+        then download the image to begin your analysis.
+      </div>
+
+      <a
+        class="image-card"
+        href="https://drive.google.com/file/d/1HkOUTiMWhD_XYO9T2lLiH039Hqgw6P0a/view?usp=sharing"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <div class="image-thumb">🖼️</div>
+        <div class="image-info">
+          <div class="image-info-title">📥 Open Challenge Image</div>
+          <div class="image-info-sub">You will be redirected to the storage location to download it.</div>
+          <div class="image-meta">💡 Hint: Try common steganography tools to inspect this file.</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- FLAG SUBMISSION SECTION -->
+    <div class="section">
+      <div class="label">🚩 Submit Flag</div>
+      <div class="input-group">
+        <input
+          type="text"
+          id="flagInput"
+          placeholder="DALISEC{hidden_in_pixels}"
+          autocomplete="off"
+        />
+      </div>
+      <div class="button-row">
+        <button class="primary-btn" onclick="checkFlag()">
+          ✅ Validate Flag
+        </button>
+        <button class="secondary-btn" onclick="toggleHint()">
+          💡 Toggle Hints
+        </button>
+      </div>
+      <div id="result">
+        ⏳ Waiting for your flag submission...
+      </div>
+    </div>
+
+    <!-- HINTS -->
+    <div class="hint-box" id="hintBox">
+      <div class="hint-title">💡 Investigation Hints</div>
+      <ul>
+        <li>Try tools like <strong>steghide</strong>, <strong>zsteg</strong>, or online steganography analyzers.</li>
+        <li>Check for hidden data in LSB (Least Significant Bit), metadata, or embedded text.</li>
+        <li>The final answer should be wrapped as <code>DALISEC{...}</code>.</li>
+      </ul>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-footer">
+      <div class="stat-item">
+        <div class="stat-label">Category</div>
+        <div class="stat-value">STEGO</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Difficulty</div>
+        <div class="stat-value">★★☆☆☆</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Points</div>
+        <div class="stat-value">150</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+   
+    const correctFlag = "DALISEC{flag}"; // TODO: change to your actual flag
+
+    function normaliseFlag(str) {
+      return str.trim();
+    }
+
+    function checkFlag() {
+      const input = document.getElementById("flagInput").value;
+      const resultEl = document.getElementById("result");
+
+      if (!input.trim()) {
+        resultEl.textContent = "⚠️ Please enter a flag before submitting.";
+        resultEl.className = "";
+        return;
+      }
+
+      if (normaliseFlag(input) === normaliseFlag(correctFlag)) {
+        resultEl.textContent = "🎉 Correct! You extracted the hidden flag from the image.";
+        resultEl.className = "result-success";
+      } else {
+        resultEl.textContent = "❌ Incorrect flag. Double-check your stego extraction and format.";
+        resultEl.className = "result-error";
+      }
+    }
+
+    function toggleHint() {
+      const box = document.getElementById("hintBox");
+      if (box.style.display === "none" || box.style.display === "") {
+        box.style.display = "block";
+      } else {
+        box.style.display = "none";
+      }
+    }
+
+    // Enter key support
+    document.getElementById("flagInput").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        checkFlag();
+      }
+    });
+  </script>
+</body>
+</html>
