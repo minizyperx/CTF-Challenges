@@ -560,7 +560,7 @@
         <input
           type="text"
           id="flagInput"
-          placeholder="DALISEC{hidden_in_pixels}"
+          placeholder="DALISEC{your_flag_here}"
           autocomplete="off"
         />
       </div>
@@ -605,14 +605,23 @@
   </div>
 
   <script>
-   
-    const correctFlag = "DALISEC{flag}"; // TODO: change to your actual flag
+    const FLAG_HASH = "58c4dcd6c1b390ac12a4b0df8a97a582ad8983ff0359d771a20cdcaaa08c0ca8";
 
     function normaliseFlag(str) {
+      // keep case-sensitive; only trim whitespace
       return str.trim();
     }
 
-    function checkFlag() {
+    async function sha256(str) {
+      const enc = new TextEncoder();
+      const data = enc.encode(str);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+      return hashHex;
+    }
+
+    async function checkFlag() {
       const input = document.getElementById("flagInput").value;
       const resultEl = document.getElementById("result");
 
@@ -622,7 +631,10 @@
         return;
       }
 
-      if (normaliseFlag(input) === normaliseFlag(correctFlag)) {
+      const normalized = normaliseFlag(input);
+      const inputHash = await sha256(normalized);
+
+      if (inputHash === FLAG_HASH) {
         resultEl.textContent = "🎉 Correct! You extracted the hidden flag from the image.";
         resultEl.className = "result-success";
       } else {
